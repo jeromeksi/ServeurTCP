@@ -1,3 +1,6 @@
+
+#ifndef   ClientSocket_H
+#define   ClientSocket_H
 #include <string>
 #include <vector>
 
@@ -5,11 +8,9 @@ class ClientSocket
 {
 	public:
 		int m_socket;
+		std::string m_clientID;
 		int m_n_vector;
-		void setInfo(std::string s);
-		std::vector<std::string> * info;
 		void (*iChange)(ClientSocket&,char&);
-		void setInfoVector(std::vector<std::string> *t_info);
 		ClientSocket(int socket);
 		~ClientSocket();
 		//void receive();
@@ -17,3 +18,4 @@ class ClientSocket
 		void socket_write(char *buffer);
 		void socket_write(char *buffer,int s);
 };
+#endif

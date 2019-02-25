@@ -1,7 +1,5 @@
 
 #include "ComServerSocket.h"
-#include "ClientSocket.h"
-
 ComServerSocket::ComServerSocket(int port)
 {
 	socketId = socket(PF_INET,SOCK_STREAM,0);
@@ -19,46 +17,54 @@ ComServerSocket::ComServerSocket(int port)
 }
 void myEvent(ClientSocket &cs,char &buffer)
 {
-	fprintf(stdout, "reception du client %i: %s\n",cs.m_socket, &buffer);
-	std::string dd = (&buffer);
-	
-	(*(cs).info)[cs.m_n_vector] = "client : "+std::to_string(cs.m_socket)+" valeur : "+dd ;
-	int size = (*(cs).info).size();
-	int i = 0;
-	char* cstr;
-	std::cout<<"test1"<<std::endl;
-	while(i<size)
-	{
-		cstr = new char[(*(cs).info)[cs.m_n_vector].length()+1];
-		strcpy(cstr,(*(cs).info)[i].c_str());
-		i++;
-		std::cout<< cstr<<std::endl;
-		(cs).socket_write(cstr,(*(cs).info)[cs.m_n_vector].length()+1);
+	fprintf(stdout, "reception du client %s: %s\n",cs.m_clientID.c_str(), &buffer);
+	std::string dd = &buffer;
+	if(dd =="INIT")
+	{		
+		fprintf(stdout, "Demande d'initialisation du client %s\n",cs.m_clientID.c_str());
+		char* cstr;
+		int size =("INIT:NAME="+cs.m_clientID).size();
+		cstr = new char[size];
+		strcpy(cstr,("INIT:NAME="+cs.m_clientID).c_str());
+		cs.socket_write(cstr,size);
+	}
+	else{
+		std::cout<<"je sais ap frere"<<std::endl;
 	}
 }
 ComServerSocket::~ComServerSocket()
 {
 	close(socketId);
 }
-void t_connect(ComServerSocket *serveur)
+void ComServerSocket::t_connect()
 {
-	std::vector<std::string> info;
-	info.push_back("toto");
-	info.pop_back();
+
 	//std::cout<<"Test3"<<std::endl;
 	while(true)
 	{
-		ClientSocket* a = new ClientSocket(	accept(serveur->socketId, 
-											(struct sockaddr*) &(serveur->serverStorage), 
-											&(serveur->addr_size)));
+		ClientSocket* a = new ClientSocket(	
+								accept(socketId, 
+								(struct sockaddr*) &(serverStorage), 
+								&(addr_size)));
 		a->setEvent(myEvent);
-		a->setInfoVector(&info);
-		//a->setInfoVector(&info);
+		listClient.push_back(a);
+		
 	}
 }
 void ComServerSocket::connect()
 {
-	std::thread tt(t_connect,this);
+	std::thread tt(&ComServerSocket::t_connect,this);
 	tt.detach();
 }
-
+void ComServerSocket::sendTest()
+{
+	std::string vv = "test";
+	char* cstr;
+	cstr = new char[5];
+	strcpy(cstr,vv.c_str());
+	for(int i(0);i<listClient.size();i++)
+	{
+		listClient[i]->socket_write(cstr,5);
+	}
+	std::cout<<listClient.size()<<std::endl;
+}

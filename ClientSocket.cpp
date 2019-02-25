@@ -6,20 +6,39 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctime>
+#include <random>
 #include "ClientSocket.h"
+#include "ComServerSocket.h"
 void receive (ClientSocket *cs);
+
+std::string generate_string(uint len)
+{
+	std::mt19937 rng;
+    rng.seed(std::random_device()());
+    std::uniform_int_distribution<std::mt19937::result_type> dist6(0,61); // distribution in range [1, 6]
+
+    //std::cout << dist6(rng) << std::endl;
+	std::string charIndex = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	std::string rs = "";
+	
+	for(uint i = 0;i<len;i++)				
+		rs += charIndex[dist6(rng)];
+	return rs;
+	
+}
 ClientSocket::ClientSocket(int socket)
 {
+	m_clientID = generate_string(5);
+
 	m_socket = socket;	
 	std::thread tt(receive,this);
 	tt.detach();
+	std::cout<<"Connexion du client : "<<m_clientID<<std::endl;	
 }
 ClientSocket::~ClientSocket()
 {
-	std::cout<<"Deconnexion du client n° : "<<m_socket<<std::endl;	
+	std::cout<<"Deconnexion du client : "<<m_clientID<<std::endl;	
 	close(m_socket);
-	(*info).pop_back();
-	std::cout<<m_socket;
 }
 void receive (ClientSocket *cs)
 {
@@ -32,7 +51,6 @@ void receive (ClientSocket *cs)
 		if(size>0)
 		{		
 			cs->iChange(*cs,*buffer);
-			std::cout<<"test2"<<std::endl;
 			//fprintf(stdout, "reception du client %i : %s\n",socket, buffer);
 		}	
 		else
@@ -41,19 +59,6 @@ void receive (ClientSocket *cs)
 		}	
 	}
 	cs->~ClientSocket();
-}
-void ClientSocket::setInfoVector(std::vector<std::string> *t_info)
-{
-	info = t_info;
-	m_n_vector = (*t_info).size();
-	//std::string nbuffer= "client : "+std::to_string(vv)+" value : ";
-	std::string nbuffer= "start";
-
-	(*t_info).push_back(nbuffer);
-}
-void ClientSocket::setInfo(std::string s)
-{
-(*info)[m_n_vector]=s;
 }
 void ClientSocket::socket_write(char *buffer)
 {
