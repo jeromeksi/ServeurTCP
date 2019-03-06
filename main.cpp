@@ -6,7 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctime>
-//#include "ClientSocket.h"
 #include "ComServerSocket.h"
 #include <vector>
 
@@ -16,6 +15,7 @@ int main()
 {	
 	ComServerSocket* serverSocket = new ComServerSocket(7777);
 	serverSocket->connect();
+
 	char a ='a';
 	while(true)
 	{
@@ -37,29 +37,3 @@ int main()
 		}
 	}	
 }
-
-std::string generate_string()
-{
-	srand(rand());
-	uint len = 10;
-	std::string charIndex = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	uint ri[15];
-	std::string rs = "";
-	
-	for(uint i = 0;i<len;i++)				
-		rs += charIndex[rand() % charIndex.length()];
-	return rs;
-	
-}
-
-
-
-
-
-
-
-
-
-
-
-
